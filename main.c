@@ -61,27 +61,25 @@ Schachbrett initSchachbrett(){
         for(int col = 0; col < 8; col++){
             Feld feld;
             feld.zeile = row;
-            feld.spalte = row;
+            feld.spalte = col;
             feld.value = -1;
             feld.letzterVersuch = 0;
             brett.felder[row][col] = feld;
         }
     }
-/*
     for (int row = 0; row < 8; row++){
         for(int col = 0; col < 8; col++){
             Feld feld = brett.felder[row][col];
             feld.moeglicheFelder = getMoeglicheFelderOfFeld(&feld);
         }
     }
-*/
     return brett;
 }
-/*
+
 MoeglicheFelder getMoeglicheFelderOfFeld(Feld *argFeld){
 
 }
-*/
+
 void brettAusgeben(Schachbrett argBrett){
     for (int row = 0; row < 8; row++){
         for(int col = 0; col < 8; col++){
