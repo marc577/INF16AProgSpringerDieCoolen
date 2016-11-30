@@ -16,6 +16,7 @@ struct Feld {
     int zeile;
     int spalte;
     int value;
+    int anzMoeglichkeiten;
     struct Feld* moeglicheFelder[8];
     int letzterVersuch;
 };
