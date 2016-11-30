@@ -1,0 +1,5 @@
+# depslib dependency file v1.0
+1480494412 source:/Users/danielabel/Documents/cWorkspace/Springerproblem/main.c
+	<stdio.h>
+	<stdlib.h>
+
