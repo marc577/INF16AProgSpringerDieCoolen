@@ -1,16 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/* Nice to have
+/* *********** Nice to have ***********
 - Wenn falsche Zeile oder Spalte, dann nochmal fragen
 - Ausgabe in Textdatei
 - Degubmodus
 
-*/
+***************************************/
 
 struct MoeglicheFelder {
 
 };
+typedef struct MoeglicheFelder MoeglicheFelder;
 
 struct Feld {
     int zeile;
@@ -20,14 +21,16 @@ struct Feld {
     struct Feld* moeglicheFelder[8];
     int letzterVersuch;
 };
+typedef struct Feld Feld;
 
 struct Schachbrett {
     struct Feld felder[8][8];
 
 };
+typedef struct Schachbrett Schachbrett;
 
-struct Feld getStartPosition() {
-    struct Feld retVal;
+Feld getStartPosition() {
+    Feld retVal;
     int iRow, iCol;
     printf("Es wird nun die Startposition abgefragt!\n");
     printf("Bitte Zeile eingeben (1-8): ");
@@ -52,11 +55,11 @@ struct Feld getStartPosition() {
     return retVal;
 }
 
-struct Schachbrett initSchachbrett(){
-    struct Schachbrett brett;
+Schachbrett initSchachbrett(){
+    Schachbrett brett;
     for (int row = 0; row < 8; row++){
         for(int col = 0; col < 8; col++){
-            struct Feld feld;
+            Feld feld;
             feld.zeile = row;
             feld.spalte = row;
             feld.value = -1;
@@ -67,20 +70,18 @@ struct Schachbrett initSchachbrett(){
 
     for (int row = 0; row < 8; row++){
         for(int col = 0; col < 8; col++){
-            struct Feld feld = brett.felder[row][col];
+            Feld feld = brett.felder[row][col];
             feld.moeglicheFelder = getMoeglicheFelderOfFeld(&feld);
         }
     }
-
-
     return brett;
 }
 
-struct MoeglicheFelder getMoeglicheFelderOfFeld(struct Feld *argFeld){
+MoeglicheFelder getMoeglicheFelderOfFeld(Feld *argFeld){
 
 }
 
-void brettAusgeben(struct Schachbrett argBrett){
+void brettAusgeben(Schachbrett argBrett){
     for (int row = 0; row < 8; row++){
         for(int col = 0; col < 8; col++){
             printf("%02d|", argBrett.felder[row][col].value);
@@ -95,7 +96,7 @@ struct Schachfeld addCellToBrett(struct Celle argCell, struct Schachfeld argBret
     return argBrett;
 }
 */
-void addCellToBrett(struct Feld argFeld, struct Schachbrett *argBrett) {
+void addCellToBrett(Feld argFeld, Schachbrett *argBrett) {
     printf("## Wert der Startposition: %d", argFeld.value);
     (*argBrett).felder[argFeld.zeile][argFeld.spalte] = argFeld;
 }
@@ -104,10 +105,10 @@ int main()
 {
     // Startprosition auswŠhlen
     printf("\n\n############################\nEs geht los\n############################\n");
-    struct Feld startFeld = getStartPosition();
+    Feld startFeld = getStartPosition();
     printf("Zeile: %d, Spalte: %d Posiion: %d\n",startFeld.zeile, startFeld.spalte, startFeld.value);
     // Schachfeld initialisieren
-    struct Schachbrett brett = initSchachbrett();
+    Schachbrett brett = initSchachbrett();
     // Schachfeld ausgeben
     printf("\n\n############################\nAusgabe\n############################\n");
     brettAusgeben(brett);
