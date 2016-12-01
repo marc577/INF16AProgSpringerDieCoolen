@@ -7,7 +7,8 @@
 - Degubmodus
 
 ***************************************/
-
+int boardMaxCol = 8;
+int boardMaxRow = 8;
 struct MoeglicheFelder {
 
 };
@@ -20,11 +21,12 @@ struct Feld {
     int anzMoeglichkeiten;
     struct Feld* moeglicheFelder[8];
     int letzterVersuch;
+    int prio;
 };
 typedef struct Feld Feld;
 
 struct Schachbrett {
-    struct Feld felder[8][8];
+    struct Feld felder[boardMaxCol][boardMaxRow];
 
 };
 typedef struct Schachbrett Schachbrett;
@@ -36,7 +38,7 @@ Feld getStartPosition() {
     printf("Bitte Zeile eingeben (1-8): ");
     scanf("%i", &iRow);
     printf("\n");
-    if (iRow < 1 || iRow > 8) {
+    if (iRow < 1 || iRow > boardMaxRow) {
         printf("Ungueltige Reihe. Programm wird beendet !\n");
     } else {
         iRow--;
@@ -45,7 +47,7 @@ Feld getStartPosition() {
     printf("Bitte Spalte eingeben (1-8): ");
     scanf("%i", &iCol);
     printf("\n");
-    if (iCol < 1 || iCol > 8) {
+    if (iCol < 1 || iCol > boardMaxCol) {
         printf("Ungueltige Spalte. Programm wird beendet !\n");
     } else {
         iCol--;
@@ -57,18 +59,27 @@ Feld getStartPosition() {
 
 Schachbrett initSchachbrett(){
     Schachbrett brett;
-    for (int row = 0; row < 8; row++){
-        for(int col = 0; col < 8; col++){
+    for (int row = 0; row < boardMaxRow; row++){
+        for(int col = 0; col < boardMaxCol; col++){
             Feld feld;
             feld.zeile = row;
             feld.spalte = col;
             feld.value = -1;
             feld.letzterVersuch = 0;
+            if((col == 1 && row == 1) || (col == boardMaxCol-1 && row == boardMaxRow-1) || (col == boardMaxCol-1 && row == 1) || (col == 1 && row == boardMaxRow-1)){
+                feld.prio = 1;
+            }
+            else if((col == 3 && row == 2) || (col == boardMaxCol-3 && row == boardMaxRow-2) || (col == boardMaxCol-3 && row == 2) || (col == 3 && row == boardMaxRow-2) || (col == 2 && row == 3) || (col == boardMaxCol-2 && row == boardMaxRow-3) || (col == boardMaxCol-2 && row == 3) || (col == 2 && row == boardMaxRow-3)){
+                feld.prio = 2;
+            }
+            else{
+                feld.prio = 4;
+            }
             brett.felder[row][col] = feld;
         }
     }
-    for (int row = 0; row < 8; row++){
-        for(int col = 0; col < 8; col++){
+    for (int row = 0; row < boardMaxRow; row++){
+        for(int col = 0; col < boardMaxCol; col++){
             Feld feld = brett.felder[row][col];
             feld.moeglicheFelder = getMoeglicheFelderOfFeld(&feld);
         }
@@ -81,8 +92,8 @@ MoeglicheFelder getMoeglicheFelderOfFeld(Feld *argFeld){
 }
 
 void brettAusgeben(Schachbrett argBrett){
-    for (int row = 0; row < 8; row++){
-        for(int col = 0; col < 8; col++){
+    for (int row = 0; row < boardMaxRow; row++){
+        for(int col = 0; col < boardMaxCol; col++){
             printf("%02d|", argBrett.felder[row][col].value);
         }
         printf("\n");
