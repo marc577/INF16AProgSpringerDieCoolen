@@ -71,6 +71,7 @@ int verifyFeld(int spalte, int zeile){
     return 0;
 }
 
+/* Sort nach Bubble Sort*/
 void sortMFelder(Feld *argFeld) {
     //Feld *mFelderPointer = argFeld->mFelder;
 
@@ -81,15 +82,14 @@ void sortMFelder(Feld *argFeld) {
         printf("%d, (%d|%d)\n", ((Feld *)argFeld->mFelder[pos])->anzMoeglichkeiten,((Feld *)argFeld->mFelder[pos])->zeile, ((Feld *)argFeld->mFelder[pos])->spalte);
     }
     //printf("XXX:%d", mFelder[0]);
-    for (int posOut = 0; posOut < argFeld->anzMoeglichkeiten; posOut++){
-        Feld* feldPointer = argFeld->mFelder[posOut];
-
-        for (int posIn = posOut; posIn < argFeld->anzMoeglichkeiten; posIn++){
-            Feld* feldPointer2 = argFeld->mFelder[posIn];
+    for (int posOut = 0; posOut < argFeld->anzMoeglichkeiten - 1; posOut++){
+        for (int posIn = 0; posIn < (argFeld->anzMoeglichkeiten - posOut - 1); posIn++){
+            Feld* feldPointer = argFeld->mFelder[posIn];
+            Feld* feldPointer2 = argFeld->mFelder[posIn+1];
             if (feldPointer->anzMoeglichkeiten > feldPointer2->anzMoeglichkeiten) {
                 void* tmp = argFeld->mFelder[posIn];
-                argFeld->mFelder[posIn] = argFeld->mFelder[posOut];
-                argFeld->mFelder[posOut] = tmp;
+                argFeld->mFelder[posIn] = argFeld->mFelder[posIn+1];
+                argFeld->mFelder[posIn+1] = tmp;
             }
 
         }
@@ -251,22 +251,28 @@ struct Schachfeld addCellToBrett(struct Celle argCell, struct Schachfeld argBret
     }
 }*/
 
+Feld* getFeldAtCounter() {
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            if (schachbrett.felder[i][j].value == walkCounter) {
+                return (Feld*) &(schachbrett.felder[i][j]);
+            }
+        }
+    }
+    //return (Feld*) &(schachbrett.felder[0][0]);
+    return NULL;
+}
 void walk(Feld startFeld){
     //schachbrett.felder[startFeld.zeile][startFeld.spalte] = startFeld;
     Feld* cFeld = &(schachbrett.felder[startFeld.zeile][startFeld.spalte]);
     //printf("WalkCounter: %d", walkCounter);
     //printf("WalkCounter: %d", cFeld.anzMoeglichkeiten);
-    for(int feldPos= 0 ; feldPos < 38; feldPos++){
-        /*if(walkCounter == -1){
-            break;
-        }*/
-        cFeld->value = walkCounter;
-        walkCounter += 1;
-
+    for(int feldPos= 0 ; feldPos < 64; feldPos++){
         int foundNextFeld = -1;
         Feld* nextFeld;
         do{
             if(cFeld->letzterVersuch >= cFeld->anzMoeglichkeiten){
+                cFeld->letzterVersuch = 0;
                 break;
             }
             void* feldAdress = cFeld->mFelder[cFeld->letzterVersuch];
@@ -278,16 +284,38 @@ void walk(Feld startFeld){
             }
         }while(foundNextFeld == -1);
         if(foundNextFeld == -1){
-            printf("Du musst zuŸck gehen");
-        }else{
-            cFeld = nextFeld;
-        }
+            cFeld->value = -1;
+            walkCounter--;
+            cFeld = getFeldAtCounter();
+            cFeld->letzterVersuch += 1;
+            if(cFeld == NULL){
+                printf("ALLES KACKE!");
+                break;
+            }
+            feldPos = walkCounter;
 
+            printf("Du musst zuueck gehen\n");
+
+
+        }else{
+            cFeld->value = walkCounter;
+            walkCounter += 1;
+            cFeld = nextFeld;
+            if (walkCounter == 63) {
+                cFeld->value = walkCounter;
+            }
+
+
+        }
+        printf("C:%d\n", feldPos);
         //nextFeld->value = walkCounter;
         //printf("Irwas Gemacht %d, %d", nextFeld->zeile, nextFeld->spalte);
 
     }
+    printf("Feld:(%d | %d) : %d\n", cFeld->zeile, cFeld->spalte, cFeld->value);
 }
+
+
 
 void initFeldGroesse() {
     // Optional: Feldgroesse einlesen
