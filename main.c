@@ -8,6 +8,14 @@
 
 ***************************************/
 const int boardMaxLength = 8;
+// boardMaxLength mit Pointer machen, damit der Wert zur Laufzeit eingelesen werden kann
+// Problem, wenn die Variable keine Konstante ist, kann kein Array initialisiert werden
+
+/* so etwa:
+const int boardMaxLength = 8;
+int *p1 = &boardMaxLength;
+*pi = 40
+*/
 
 struct Feld {
     int zeile;
@@ -29,7 +37,7 @@ typedef struct Schachbrett Schachbrett;
 Feld getStartPosition() {
     Feld retVal;
     int iRow, iCol;
-    printf("Es wird nun die Startposition abgefragt!\n");
+    printf("Es wird nun die Startposition abgefragt!!!!!!\n");
     printf("Bitte Zeile eingeben (1-8): ");
     scanf("%i", &iRow);
     printf("\n");
@@ -84,7 +92,7 @@ void sortMFelder(Feld *argFeld, Schachbrett *brett) {
     }
 
 
-    printf("### NACHHER ################################################\n");
+    printf("### NACHHER *********************************************\n");
 
     for (int pos = 0; pos < argFeld->anzMoeglichkeiten; pos++){
         printf("%d\n", ((Feld *)argFeld->mFelder[pos])->anzMoeglichkeiten);
@@ -204,8 +212,6 @@ Schachbrett initSchachbrett(){
     return brett;
 }
 
-
-
 void brettAusgeben(Schachbrett argBrett){
     for (int row = 0; row < boardMaxLength; row++){
         for(int col = 0; col < boardMaxLength; col++){
@@ -221,9 +227,28 @@ struct Schachfeld addCellToBrett(struct Celle argCell, struct Schachfeld argBret
     return argBrett;
 }
 */
-void addCellToBrett(Feld argFeld, Schachbrett *argBrett) {
-    printf("## Wert der Startposition: %d", argFeld.value);
-    (*argBrett).felder[argFeld.zeile][argFeld.spalte] = argFeld;
+void addCellToBrett(Feld argFeld, Schachbrett *argBrett, int counter) {
+    printf("\n## Bin beim laufen\n");
+    counter = counter +1;
+    int posI = 0;
+    if (argFeld.value < -99) {
+        printf("\n## Wert der Startposition: %d\n", argFeld.value);
+        (*argBrett).felder[argFeld.zeile][argFeld.spalte] = argFeld;
+    } else if(argFeld.value >= 64) {
+        printf("\n## Wert der letzten Position: %d\n", argFeld.value);
+    } else {
+        //for (int posI = 0; posI < argFeld.anzMoeglichkeiten; posI++)
+        printf("\n## Wert der aktuellen Position: %d\n", argFeld.value);
+        argFeld.value = counter;
+        for (posI = 0; posI <= 1; posI++) {
+            argFeld.letzterVersuch = posI;
+            int newRow = ((Feld *)argFeld.mFelder[posI])->zeile;
+            int newCol = ((Feld *)argFeld.mFelder[posI])->spalte;
+            Feld* newFeld = argFeld.mFelder[posI];
+            (*argBrett).felder[newRow][newCol] = *newFeld;
+            addCellToBrett(*newFeld, (Schachbrett*) &argBrett, counter);
+        }
+    }
 }
 
 void initFeldGroesse() {
@@ -234,20 +259,16 @@ void initFeldGroesse() {
 
 int main()
 {
-    // Startprosition auswŠhlen
     printf("\n\n############################\nEs geht los\n############################\n");
     Feld startFeld = getStartPosition();
     printf("Zeile: %d, Spalte: %d Posiion: %d\n",startFeld.zeile, startFeld.spalte, startFeld.value);
-    // Schachfeld initialisieren
     Schachbrett brett = initSchachbrett();
-    // Schachfeld ausgeben
-    printf("\n\n############################\nAusgabe\n############################\n");
+    printf("\n\n############################\nAusgabe Brett nach initialisieren\n############################\n");
     brettAusgeben(brett);
-    // Startzelle hinzufügen
-    //brett = addCellToBrett(startCell, &brett);
-    addCellToBrett(startFeld, &brett);
+    printf("\n## Bin beim laufen Main\n");
+    addCellToBrett(startFeld, &brett, 0);
     // Schachfeld ausgeben
-    printf("\n\n############################\nAusgabe\n############################\n");
+    printf("\n\n############################\nAusgabe nachm laufen\n############################\n");
     brettAusgeben(brett);
 
     return 0;
