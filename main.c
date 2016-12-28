@@ -24,7 +24,7 @@ struct Feld {
     int anzMoeglichkeiten;
     //int moeglicheFelderPositions[boardMaxLength][boardMaxLength];
     void* mFelder[8];
-    int letzterVersuch;
+    int letzterVersuch ;
     int prio;
 };
 typedef struct Feld Feld;
@@ -75,11 +75,11 @@ void sortMFelder(Feld *argFeld) {
     //Feld *mFelderPointer = argFeld->mFelder;
 
     //void* mFelder = argFeld->mFelder;
-    //printf("### VORHER ################################################\n");
+    printf("### VORHER ## %d, %d ##############################################\n", argFeld->zeile, argFeld->spalte);
 
-    /*for (int pos = 0; pos < argFeld->anzMoeglichkeiten; pos++){
-        printf("%d\n", ((Feld *)argFeld->mFelder[pos])->anzMoeglichkeiten);
-    }*/
+    for (int pos = 0; pos < argFeld->anzMoeglichkeiten; pos++){
+        printf("%d, (%d|%d)\n", ((Feld *)argFeld->mFelder[pos])->anzMoeglichkeiten,((Feld *)argFeld->mFelder[pos])->zeile, ((Feld *)argFeld->mFelder[pos])->spalte);
+    }
     //printf("XXX:%d", mFelder[0]);
     for (int posOut = 0; posOut < argFeld->anzMoeglichkeiten; posOut++){
         Feld* feldPointer = argFeld->mFelder[posOut];
@@ -96,13 +96,13 @@ void sortMFelder(Feld *argFeld) {
     }
 
 
-    //printf("### NACHHER *********************************************\n");
+    printf("### NACHHER ## %d, %d ##############################################\n", argFeld->zeile, argFeld->spalte);
 
-    /*for (int pos = 0; pos < argFeld->anzMoeglichkeiten; pos++){
-        printf("%d\n", ((Feld *)argFeld->mFelder[pos])->anzMoeglichkeiten);
-    }*/
+    for (int pos = 0; pos < argFeld->anzMoeglichkeiten; pos++){
+        printf("%d, (%d|%d)\n", ((Feld *)argFeld->mFelder[pos])->anzMoeglichkeiten,((Feld *)argFeld->mFelder[pos])->zeile, ((Feld *)argFeld->mFelder[pos])->spalte);
+    }
 
-    //printf("### ENDE ################################################\n");
+    printf("### ENDE ################################################\n");
 
     //argFeld->mFelder = mFelder;
 }
@@ -112,50 +112,50 @@ void initMoeglicheFelderOfFeld(Feld *argFeld){
     int startRow = argFeld->zeile;
     int startCol = argFeld->spalte;
 
-    int newCol = startCol + 3;
+    int newCol = startCol + 2;
     int newRow = startRow + 1;
     if(verifyFeld(newCol, newRow) != 0){
         argFeld->mFelder[counter] = &schachbrett.felder[newRow][newCol];
         counter += 1;
     }
-    newCol = startCol + 3;
+    newCol = startCol + 2;
     newRow = startRow - 1;
     if(verifyFeld(newCol, newRow) != 0){
         argFeld->mFelder[counter] = &schachbrett.felder[newRow][newCol];
         counter += 1;
     }
-    newCol = startCol - 3;
+    newCol = startCol - 2;
     newRow = startRow + 1;
     if(verifyFeld(newCol, newRow) != 0){
         argFeld->mFelder[counter] = &schachbrett.felder[newRow][newCol];
         counter += 1;
     }
-    newCol = startCol - 3;
+    newCol = startCol - 2;
     newRow = startRow - 1;
     if(verifyFeld(newCol, newRow) != 0){
         argFeld->mFelder[counter] = &schachbrett.felder[newRow][newCol];
         counter += 1;
     }
     newCol = startCol + 1;
-    newRow = startRow - 3;
+    newRow = startRow - 2;
     if(verifyFeld(newCol, newRow) != 0){
         argFeld->mFelder[counter] = &schachbrett.felder[newRow][newCol];
         counter += 1;
     }
     newCol = startCol + 1;
-    newRow = startRow + 3;
+    newRow = startRow + 2;
     if(verifyFeld(newCol, newRow) != 0){
         argFeld->mFelder[counter] = &schachbrett.felder[newRow][newCol];
         counter += 1;
     }
     newCol = startCol - 1;
-    newRow = startRow + 3;
+    newRow = startRow + 2;
     if(verifyFeld(newCol, newRow) != 0){
         argFeld->mFelder[counter] = &schachbrett.felder[newRow][newCol];
         counter += 1;
     }
     newCol = startCol - 1;
-    newRow = startRow - 3;
+    newRow = startRow - 2;
     if(verifyFeld(newCol, newRow) != 0){
         argFeld->mFelder[counter] = &schachbrett.felder[newRow][newCol];
         counter += 1;
@@ -252,8 +252,41 @@ struct Schachfeld addCellToBrett(struct Celle argCell, struct Schachfeld argBret
 }*/
 
 void walk(Feld startFeld){
-    schachbrett.felder[startFeld.zeile][startFeld.spalte] = startFeld;
-    for()
+    //schachbrett.felder[startFeld.zeile][startFeld.spalte] = startFeld;
+    Feld* cFeld = &(schachbrett.felder[startFeld.zeile][startFeld.spalte]);
+    //printf("WalkCounter: %d", walkCounter);
+    //printf("WalkCounter: %d", cFeld.anzMoeglichkeiten);
+    for(int feldPos= 0 ; feldPos < 38; feldPos++){
+        /*if(walkCounter == -1){
+            break;
+        }*/
+        cFeld->value = walkCounter;
+        walkCounter += 1;
+
+        int foundNextFeld = -1;
+        Feld* nextFeld;
+        do{
+            if(cFeld->letzterVersuch >= cFeld->anzMoeglichkeiten){
+                break;
+            }
+            void* feldAdress = cFeld->mFelder[cFeld->letzterVersuch];
+            nextFeld = (Feld *)feldAdress;
+            if(nextFeld->value == -1){
+                foundNextFeld = 1;
+            }else{
+                cFeld->letzterVersuch += 1;
+            }
+        }while(foundNextFeld == -1);
+        if(foundNextFeld == -1){
+            printf("Du musst zuŸck gehen");
+        }else{
+            cFeld = nextFeld;
+        }
+
+        //nextFeld->value = walkCounter;
+        //printf("Irwas Gemacht %d, %d", nextFeld->zeile, nextFeld->spalte);
+
+    }
 }
 
 void initFeldGroesse() {
