@@ -253,7 +253,7 @@ struct Schachfeld addCellToBrett(struct Celle argCell, struct Schachfeld argBret
 
 void walk(Feld startFeld){
     schachbrett.felder[startFeld.zeile][startFeld.spalte] = startFeld;
-
+    for()
 }
 
 void initFeldGroesse() {
