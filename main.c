@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/* *********** Nice to have ***********
+/* ************ Nice to have ***********
 - Wenn falsche Zeile oder Spalte, dann nochmal fragen
 - Ausgabe in Textdatei
 - Degubmodus
@@ -23,7 +23,7 @@ struct Feld {
     int value;
     int anzMoeglichkeiten;
     //int moeglicheFelderPositions[boardMaxLength][boardMaxLength];
-    void* mFelder[8];
+    void* mFelder[boardMaxLength];
     int letzterVersuch ;
     int prio;
 };
