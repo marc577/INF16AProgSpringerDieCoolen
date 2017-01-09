@@ -5,35 +5,37 @@
 - Wenn falsche Zeile oder Spalte, dann nochmal fragen
 - Ausgabe in Textdatei
 - Degubmodus
-
 ***************************************/
 const int boardMaxLength = 8;
 // boardMaxLength mit Pointer machen, damit der Wert zur Laufzeit eingelesen werden kann
 // Problem, wenn die Variable keine Konstante ist, kann kein Array initialisiert werden
 
-/* so etwa:
-const int boardMaxLength = 8;
-int *p1 = &boardMaxLength;
-*pi = 40
-*/
-
+/**
+ * Struct Feld
+ **/
 struct Feld {
     int zeile;
     int spalte;
     int value;
     int anzMoeglichkeiten;
-    //int moeglicheFelderPositions[boardMaxLength][boardMaxLength];
     void* mFelder[boardMaxLength];
     int letzterVersuch ;
     int prio;
 };
 typedef struct Feld Feld;
 
+/**
+ * Struct Schachbrett
+ **/
 struct Schachbrett {
     struct Feld felder[boardMaxLength][boardMaxLength];
 };
 typedef struct Schachbrett Schachbrett;
 
+/**
+ * Globale Variablen
+ * Struct Schachbrett
+ **/
 Schachbrett schachbrett;
 int walkCounter = 0;
 
