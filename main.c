@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 /* ************ Nice to have ***********
 - Wenn falsche Zeile oder Spalte, dann nochmal fragen
@@ -222,36 +223,7 @@ void brettAusgeben(){
         printf("\n");
     }
 }
-/*
-struct Schachfeld addCellToBrett(struct Celle argCell, struct Schachfeld argBrett) {
-    printf("## Wert der Startposition: %d", argCell.value);
-    argBrett.felder[argCell.zeile][argCell.spalte] = argCell;
-    return argBrett;
-}
-*/
-/*void addCellToBrett(Feld argFeld, int counter) {
-    printf("\n## Bin beim laufen\n");
-    counter = counter +1;
-    int posI = 0;
-    if (argFeld.value < -99) {
-        printf("\n## Wert der Startposition: %d\n", argFeld.value);
-        schachbrett.felder[argFeld.zeile][argFeld.spalte] = argFeld;
-    } else if(argFeld.value >= 64) {
-        printf("\n## Wert der letzten Position: %d\n", argFeld.value);
-    } else {
-        //for (int posI = 0; posI < argFeld.anzMoeglichkeiten; posI++)
-        printf("\n## Wert der aktuellen Position: %d\n", argFeld.value);
-        argFeld.value = counter;
-        for (posI = 0; posI <= 1; posI++) {
-            argFeld.letzterVersuch = posI;
-            int newRow = ((Feld *)argFeld.mFelder[posI])->zeile;
-            int newCol = ((Feld *)argFeld.mFelder[posI])->spalte;
-            Feld* newFeld = argFeld.mFelder[posI];
-            schachbrett.felder[newRow][newCol] = *newFeld;
-            addCellToBrett(*newFeld, counter);
-        }
-    }
-}*/
+
 
 Feld* getFeldAtCounter() {
     for (int i = 0; i < 8; i++) {
@@ -264,11 +236,28 @@ Feld* getFeldAtCounter() {
     //return (Feld*) &(schachbrett.felder[0][0]);
     return NULL;
 }
+
+/** Stopwatch **/
+double start_t_millis, end_t_millis;
+double get_time_millis(){
+    struct timeval t;
+    gettimeofday(&t, NULL);
+    return (t.tv_sec + (t.tv_usec / 1000000.0)) * 1000.0;
+}
+void startStopwatch(){
+    start_t_millis = get_time_millis();
+}
+void stopStopwatch(){
+    end_t_millis = get_time_millis();
+}
+void printStopwatch(){
+    printf("Dauer: %lf Millisekunden. \n", end_t_millis - start_t_millis);
+}
+
 void walk(Feld startFeld){
-    //schachbrett.felder[startFeld.zeile][startFeld.spalte] = startFeld;
+    startStopwatch();
     Feld* cFeld = &(schachbrett.felder[startFeld.zeile][startFeld.spalte]);
-    //printf("WalkCounter: %d", walkCounter);
-    //printf("WalkCounter: %d", cFeld.anzMoeglichkeiten);
+     // start walk
     for(int feldPos= 0 ; feldPos < 64; feldPos++){
         int foundNextFeld = -1;
         Feld* nextFeld;
@@ -291,13 +280,11 @@ void walk(Feld startFeld){
             cFeld = getFeldAtCounter();
             cFeld->letzterVersuch += 1;
             if(cFeld == NULL){
-                printf("ALLES KACKE!");
+                printf("Kein Weg gefunden!\n");
                 break;
             }
             feldPos = walkCounter;
-
-            printf("Du musst zuueck gehen\n");
-
+            //printf("Keine Moeglichkeit mehr.Gehe eins zurŸck!\n");
 
         }else{
             cFeld->value = walkCounter;
@@ -306,15 +293,11 @@ void walk(Feld startFeld){
             if (walkCounter == 63) {
                 cFeld->value = walkCounter;
             }
-
-
         }
-        printf("C:%d\n", feldPos);
-        //nextFeld->value = walkCounter;
-        //printf("Irwas Gemacht %d, %d", nextFeld->zeile, nextFeld->spalte);
-
+        //printf("Aktuelle Feldposition: %d\n", feldPos);
     }
-    printf("Feld:(%d | %d) : %d\n", cFeld->zeile, cFeld->spalte, cFeld->value);
+    // end walk
+    stopStopwatch();
 }
 
 
@@ -327,17 +310,22 @@ void initFeldGroesse() {
 
 int main()
 {
-    printf("\n\n############################\nEs geht los\n############################\n");
+    printf("\n##### Springerproblem #####\n");
+
     Feld startFeld = getStartPosition();
     printf("Zeile: %d, Spalte: %d Posiion: %d\n",startFeld.zeile, startFeld.spalte, startFeld.value);
+
     initSchachbrett();
-    printf("\n\n############################\nAusgabe Brett nach initialisieren\n############################\n");
+    printf("\n\nSchachbrett initialisiert: \n");
+    // Schachfeld nach der Initialisierung
     brettAusgeben();
-    printf("\n## Bin beim laufen Main\n");
-    //addCellToBrett(startFeld, 0);
+
+    printf("\n\nSpringer laeuft ...");
     walk(startFeld);
-    // Schachfeld ausgeben
-    printf("\n\n############################\nAusgabe nachm laufen\n############################\n");
+    printf("\n... laufen abgeschlossen. ");
+    printStopwatch();
+    printf("\n");
+    // Schachfeld nach dem laufen
     brettAusgeben();
 
     return 0;
