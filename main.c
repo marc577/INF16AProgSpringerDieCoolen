@@ -5,17 +5,15 @@
 
 
 /* ************ Nice to have ***********
-- Wenn falsche Zeile oder Spalte, dann nochmal fragen
 - Ausgabe in Textdatei
 - Degubmodus
 - vairable Brettgroesse
+    ->boardMaxLength mit Pointer machen, damit der Wert zur Laufzeit eingelesen werden kann
+    ->Problem, wenn die Variable keine Konstante ist, kann kein Array initialisiert werden
 ***************************************/
 const int boardMaxLength = 8;
-// boardMaxLength mit Pointer machen, damit der Wert zur Laufzeit eingelesen werden kann
-// Problem, wenn die Variable keine Konstante ist, kann kein Array initialisiert werden
-
 /**
- * Struct Feld
+ * Struct Field
  **/
 struct Field {
     int zeile;
@@ -41,6 +39,7 @@ typedef struct Schachbrett Schachbrett;
  * Struct Schachbrett
  **/
 Schachbrett schachbrett;
+
 
 
 
@@ -78,7 +77,8 @@ Field getStartPosition() {
         }
     }while( inputVerifyer == 0 );
     retVal.zeile = inputRow - 1;
-
+    retVal.desc[0] = retVal.spalte + 65;
+    retVal.desc[1] = (retVal.zeile + 1) +'0';
     return retVal;
 }
 
@@ -192,8 +192,6 @@ void initBoard(){
             field.spalte = col;
             field.value = -1;
             field.letzterVersuch = 0;
-
-            //sprintf(field.desc, "%c%d", field.spalte + 65, field.zeile + 1);
             field.desc[0] = field.spalte + 65;
             field.desc[1] = (field.zeile + 1) +'0';
             schachbrett.fielder[row][col] = field;
@@ -315,14 +313,13 @@ int main()
 {
     printf("\n##### Springerproblem #####\n");
 
-    Field startField = getStartPosition();
-
     initBoard();
-    printf("\n\nSchachbrett initialisiert: \n");
-    // Schachfield nach der Initialisierung
+    printf("\n\nSchachbrett initialisiert: \n\n");
     printBoard();
 
-    printf("\n\nSpringer laeuft von %c%d aus los...", startField.spalte+65, startField.zeile+1);
+    Field startField = getStartPosition();
+
+    printf("\n\nSpringer laeuft von %s aus los...", startField.desc);
     walk(startField);
     printf("\n... laufen abgeschlossen. ");
     printStopwatch();
