@@ -6,3 +6,7 @@
 .vscode/.cmaketools.json
 
 .vscode/launch.json
+
+*.layout
+
+*.layout
