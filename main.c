@@ -107,11 +107,11 @@ Field getStartPosition() {
  * @param The field reference (callbyreference) which followers will be sort.
  */
 void sortPossibleFollowerArray(Field *argField) {
-    printf("## Nachfolger von %s unsortiert: \n", argField->desc);
+    /*printf("## Nachfolger von %s unsortiert: \n", argField->desc);
     for (int pos = 0; pos < argField->cPossMoves; pos++){
         printf("%s -> mit %d Nachfolgern \n", ((Field *)argField->pFields[pos])->desc,((Field *)argField->pFields[pos])->cPossMoves);
     }
-    printf("##");
+    printf("##");*/
 
     for (int posOut = 0; posOut < argField->cPossMoves - 1; posOut++){
         for (int posIn = 0; posIn < (argField->cPossMoves - posOut - 1); posIn++){
@@ -126,11 +126,11 @@ void sortPossibleFollowerArray(Field *argField) {
         }
     }
 
-    printf("## Nachfolger von %s sortiert: \n", argField->desc);
+    /*printf("## Nachfolger von %s sortiert: \n", argField->desc);
     for (int pos = 0; pos < argField->cPossMoves; pos++){
         printf("%s -> mit %d Nachfolgern \n", ((Field *)argField->pFields[pos])->desc,((Field *)argField->pFields[pos])->cPossMoves);
     }
-    printf("## \n\n");
+    printf("## \n\n");*/
 
 }
 
@@ -314,6 +314,77 @@ void printStopwatch(){
  * Starts the knights walk.
  * @param startField The field from which the walk begins.
  */
+void walkAndGoToStartPos(Field startField){
+    startStopwatch();
+    int walkCounter = 0;
+    Field* cField = &(board.fields[startField.row][startField.column]);
+     // start walk
+    for(int fieldPos= 0 ; fieldPos < 64; fieldPos++){
+        int foundnextField = -1;
+        Field* nextField;
+        do{
+            if(cField->lastTry >= cField->cPossMoves){
+                cField->lastTry = 0;
+                break;
+            }
+            void* fieldAdress = cField->pFields[cField->lastTry];
+            nextField = (Field *)fieldAdress;
+            if(nextField->value == -1){
+                foundnextField = 1;
+            }else{
+                cField->lastTry += 1;
+            }
+        }while(foundnextField == -1);
+        if(foundnextField == -1){
+            cField->value = -1;
+            walkCounter--;
+            cField = getFieldAt(walkCounter);
+            cField->lastTry += 1;
+            if(cField == NULL){
+                printf("Kein Weg gefunden!\n");
+                break;
+            }
+            fieldPos = walkCounter;
+            //printf("Keine Moeglichkeit mehr.Gehe eins zurŸck!\n");
+
+        }else{
+
+            cField->value = walkCounter;
+            walkCounter += 1;
+            cField = nextField;
+            if (walkCounter == 63) {
+                cField->value = walkCounter;
+                int boStartFieldFounded = -1;
+                for (int posI = cField->lastTry; posI < cField->cPossMoves; posI++) {
+                    void* fieldAdress = cField->pFields[posI];
+                    nextField = (Field *)fieldAdress;
+                    if(nextField->value == 0){
+                        boStartFieldFounded = 1;
+                    }
+                }
+                if (boStartFieldFounded == -1) {
+                    cField->value = -1;
+                    walkCounter--;
+                    cField = getFieldAt(walkCounter);
+                    cField->lastTry += 1;
+                    if(cField == NULL){
+                        printf("Kein Weg gefunden!\n");
+                        break;
+                    }
+                    fieldPos = walkCounter;
+                }
+            }
+        }
+        //printf("Aktuelle Feldposition: %d\n", fieldPos);
+    }
+    // end walk
+    stopStopwatch();
+}
+
+/**
+ * Starts the knights walk.
+ * @param startField The field from which the walk begins.
+ */
 void walk(Field startField){
     startStopwatch();
     int walkCounter = 0;
@@ -362,9 +433,37 @@ void walk(Field startField){
     stopStopwatch();
 }
 
+int main() {
+
+    for (int rowI = 0; rowI < 8; rowI++) {
+        for (int colI = 0; colI < 8; colI++) {
+            printf("\n##### Springerproblem #####\n");
+            initBoard();
+            printf("\n\nSchachbrett initialisiert\n");
+            Field startField;
+            startField.column = colI;
+            startField.row = rowI;
+            startField.desc[0] = startField.column + 65;
+            startField.desc[1] = (startField.row + 1) +'0';
+
+            printf("Springer laeuft von %s aus los...", startField.desc);
+            //walk(startField);
+            walkAndGoToStartPos(startField);
+            printf("\n... laufen abgeschlossen. ");
+            printStopwatch();
+            printf("\n");
+            // Schachfield nach dem laufen
+            printBoard();
+        }
+    }
+    return 0;
+}
+
 /**
  * Starts the programm.
  */
+
+ /*
 int main()
 {
     printf("\n##### Springerproblem #####\n");
@@ -376,12 +475,13 @@ int main()
     Field startField = getStartPosition();
 
     printf("\n\nSpringer laeuft von %s aus los...", startField.desc);
-    walk(startField);
+    //walk(startField);
+    walkAndGoToStartPos(startField);
     printf("\n... laufen abgeschlossen. ");
     printStopwatch();
     printf("\n");
     // Schachfield nach dem laufen
     printBoard();
-
     return 0;
 }
+*/
