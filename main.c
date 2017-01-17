@@ -25,18 +25,18 @@
  * @property row The row index of the board.
  * @property column The column index in the board.
  * @property value The couter value of the knight's steps.
- * @property anzMoeglichkeiten
- * @property mFelder
- * @property letzterVersuch
+ * @property cPossMoves
+ * @property pFields
+ * @property lastTry
  * @property desc Column-Row representation of the field in the borad (human readable)
  **/
 struct Field {
-    int zeile;
-    int spalte;
+    int row;
+    int column;
     int value;
-    int anzMoeglichkeiten;
-    void* mFelder[maxBoardSize];
-    int letzterVersuch ;
+    int cPossMoves;
+    void* pFields[maxBoardSize];
+    int lastTry ;
     char desc[2];
 };
 typedef struct Field Field;
@@ -71,7 +71,7 @@ Field getStartPosition() {
     int inputVerifyer = 0;
     char inputCol;
     do{
-        printf("Bitte Spalte eingeben (A-H): ");
+        printf("Bitte column eingeben (A-H): ");
         scanf("%c", &inputCol);
         inputCol = toupper(inputCol);
         inputVerifyer = (inputCol >= 'A' && inputCol <= 'H');
@@ -79,7 +79,7 @@ Field getStartPosition() {
             printf("Eingabe falsch.\n");
         }
     }while( inputVerifyer == 0);
-    retVal.spalte = inputCol - 65;
+    retVal.column = inputCol - 65;
 
     int inputRow;
     inputVerifyer = 0;
@@ -91,9 +91,9 @@ Field getStartPosition() {
             printf("Eingabe falsch.\n");
         }
     }while( inputVerifyer == 0 );
-    retVal.zeile = inputRow - 1;
-    retVal.desc[0] = retVal.spalte + 65;
-    retVal.desc[1] = (retVal.zeile + 1) +'0';
+    retVal.row = inputRow - 1;
+    retVal.desc[0] = retVal.column + 65;
+    retVal.desc[1] = (retVal.row + 1) +'0';
     return retVal;
 }
 
@@ -108,27 +108,27 @@ Field getStartPosition() {
  */
 void sortPossibleFollowerArray(Field *argField) {
     printf("## Nachfolger von %s unsortiert: \n", argField->desc);
-    for (int pos = 0; pos < argField->anzMoeglichkeiten; pos++){
-        printf("%s -> mit %d Nachfolgern \n", ((Field *)argField->mFelder[pos])->desc,((Field *)argField->mFelder[pos])->anzMoeglichkeiten);
+    for (int pos = 0; pos < argField->cPossMoves; pos++){
+        printf("%s -> mit %d Nachfolgern \n", ((Field *)argField->pFields[pos])->desc,((Field *)argField->pFields[pos])->cPossMoves);
     }
     printf("##");
 
-    for (int posOut = 0; posOut < argField->anzMoeglichkeiten - 1; posOut++){
-        for (int posIn = 0; posIn < (argField->anzMoeglichkeiten - posOut - 1); posIn++){
-            Field* fieldPointer = argField->mFelder[posIn];
-            Field* fieldPointer2 = argField->mFelder[posIn+1];
-            if (fieldPointer->anzMoeglichkeiten > fieldPointer2->anzMoeglichkeiten) {
-                void* tmp = argField->mFelder[posIn];
-                argField->mFelder[posIn] = argField->mFelder[posIn+1];
-                argField->mFelder[posIn+1] = tmp;
+    for (int posOut = 0; posOut < argField->cPossMoves - 1; posOut++){
+        for (int posIn = 0; posIn < (argField->cPossMoves - posOut - 1); posIn++){
+            Field* fieldPointer = argField->pFields[posIn];
+            Field* fieldPointer2 = argField->pFields[posIn+1];
+            if (fieldPointer->cPossMoves > fieldPointer2->cPossMoves) {
+                void* tmp = argField->pFields[posIn];
+                argField->pFields[posIn] = argField->pFields[posIn+1];
+                argField->pFields[posIn+1] = tmp;
             }
 
         }
     }
 
     printf("## Nachfolger von %s sortiert: \n", argField->desc);
-    for (int pos = 0; pos < argField->anzMoeglichkeiten; pos++){
-        printf("%s -> mit %d Nachfolgern \n", ((Field *)argField->mFelder[pos])->desc,((Field *)argField->mFelder[pos])->anzMoeglichkeiten);
+    for (int pos = 0; pos < argField->cPossMoves; pos++){
+        printf("%s -> mit %d Nachfolgern \n", ((Field *)argField->pFields[pos])->desc,((Field *)argField->pFields[pos])->cPossMoves);
     }
     printf("## \n\n");
 
@@ -155,59 +155,59 @@ int verifyFeld(int column, int row){
  */
 void initPossibleFollowersForField(Field *argField){
     int counter = 0;
-    int startRow = argField->zeile;
-    int startCol = argField->spalte;
+    int startRow = argField->row;
+    int startCol = argField->column;
 
     int newCol = startCol + 2;
     int newRow = startRow + 1;
     if(verifyFeld(newCol, newRow) != 0){
-        argField->mFelder[counter] = &board.fields[newRow][newCol];
+        argField->pFields[counter] = &board.fields[newRow][newCol];
         counter += 1;
     }
     newCol = startCol + 2;
     newRow = startRow - 1;
     if(verifyFeld(newCol, newRow) != 0){
-        argField->mFelder[counter] = &board.fields[newRow][newCol];
+        argField->pFields[counter] = &board.fields[newRow][newCol];
         counter += 1;
     }
     newCol = startCol - 2;
     newRow = startRow + 1;
     if(verifyFeld(newCol, newRow) != 0){
-        argField->mFelder[counter] = &board.fields[newRow][newCol];
+        argField->pFields[counter] = &board.fields[newRow][newCol];
         counter += 1;
     }
     newCol = startCol - 2;
     newRow = startRow - 1;
     if(verifyFeld(newCol, newRow) != 0){
-        argField->mFelder[counter] = &board.fields[newRow][newCol];
+        argField->pFields[counter] = &board.fields[newRow][newCol];
         counter += 1;
     }
     newCol = startCol + 1;
     newRow = startRow - 2;
     if(verifyFeld(newCol, newRow) != 0){
-        argField->mFelder[counter] = &board.fields[newRow][newCol];
+        argField->pFields[counter] = &board.fields[newRow][newCol];
         counter += 1;
     }
     newCol = startCol + 1;
     newRow = startRow + 2;
     if(verifyFeld(newCol, newRow) != 0){
-        argField->mFelder[counter] = &board.fields[newRow][newCol];
+        argField->pFields[counter] = &board.fields[newRow][newCol];
         counter += 1;
     }
     newCol = startCol - 1;
     newRow = startRow + 2;
     if(verifyFeld(newCol, newRow) != 0){
-        argField->mFelder[counter] = &board.fields[newRow][newCol];
+        argField->pFields[counter] = &board.fields[newRow][newCol];
         counter += 1;
     }
     newCol = startCol - 1;
     newRow = startRow - 2;
     if(verifyFeld(newCol, newRow) != 0){
-        argField->mFelder[counter] = &board.fields[newRow][newCol];
+        argField->pFields[counter] = &board.fields[newRow][newCol];
         counter += 1;
     }
 
-    argField->anzMoeglichkeiten = counter;
+    argField->cPossMoves = counter;
 
 }
 
@@ -218,12 +218,12 @@ void initBoard(){
     for (int row = 0; row < maxBoardSize; row++){
         for(int col = 0; col < maxBoardSize; col++){
             Field field;
-            field.zeile = row;
-            field.spalte = col;
+            field.row = row;
+            field.column = col;
             field.value = -1;
-            field.letzterVersuch = 0;
-            field.desc[0] = field.spalte + 65;
-            field.desc[1] = (field.zeile + 1) +'0';
+            field.lastTry = 0;
+            field.desc[0] = field.column + 65;
+            field.desc[1] = (field.row + 1) +'0';
             board.fields[row][col] = field;
         }
     }
@@ -317,30 +317,30 @@ void printStopwatch(){
 void walk(Field startField){
     startStopwatch();
     int walkCounter = 0;
-    Field* cFeld = &(board.fields[startField.zeile][startField.spalte]);
+    Field* cField = &(board.fields[startField.row][startField.column]);
      // start walk
     for(int fieldPos= 0 ; fieldPos < 64; fieldPos++){
-        int foundNextFeld = -1;
-        Field* nextFeld;
+        int foundnextField = -1;
+        Field* nextField;
         do{
-            if(cFeld->letzterVersuch >= cFeld->anzMoeglichkeiten){
-                cFeld->letzterVersuch = 0;
+            if(cField->lastTry >= cField->cPossMoves){
+                cField->lastTry = 0;
                 break;
             }
-            void* fieldAdress = cFeld->mFelder[cFeld->letzterVersuch];
-            nextFeld = (Field *)fieldAdress;
-            if(nextFeld->value == -1){
-                foundNextFeld = 1;
+            void* fieldAdress = cField->pFields[cField->lastTry];
+            nextField = (Field *)fieldAdress;
+            if(nextField->value == -1){
+                foundnextField = 1;
             }else{
-                cFeld->letzterVersuch += 1;
+                cField->lastTry += 1;
             }
-        }while(foundNextFeld == -1);
-        if(foundNextFeld == -1){
-            cFeld->value = -1;
+        }while(foundnextField == -1);
+        if(foundnextField == -1){
+            cField->value = -1;
             walkCounter--;
-            cFeld = getFieldAt(walkCounter);
-            cFeld->letzterVersuch += 1;
-            if(cFeld == NULL){
+            cField = getFieldAt(walkCounter);
+            cField->lastTry += 1;
+            if(cField == NULL){
                 printf("Kein Weg gefunden!\n");
                 break;
             }
@@ -349,11 +349,11 @@ void walk(Field startField){
 
         }else{
 
-            cFeld->value = walkCounter;
+            cField->value = walkCounter;
             walkCounter += 1;
-            cFeld = nextFeld;
+            cField = nextField;
             if (walkCounter == 63) {
-                cFeld->value = walkCounter;
+                cField->value = walkCounter;
             }
         }
         //printf("Aktuelle Feldposition: %d\n", fieldPos);
