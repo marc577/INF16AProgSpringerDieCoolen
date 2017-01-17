@@ -16,7 +16,8 @@
  * Global variable maxBoardSize
  * Sets the max number of fields in the board
  **/
-const int maxBoardSize = 8;
+//const int maxBoardSize = 8;
+#define maxBoardSize 8
 
 /**
  * Struct Field
@@ -277,11 +278,12 @@ double start_t_millis, end_t_millis;
  * Returns the time in millis from the clock time.
  */
 double get_time_millis(){
-    double ms; // millis to return
-    struct timespec spec;
-    clock_gettime(CLOCK_MONOTONIC, &spec);
-    ms = spec.tv_nsec / 1.0e6; // convert nanoseconds to milliseconds
-    return ms;
+    //double ms; // millis to return
+    //struct timespec spec;
+    //clock_gettime(CLOCK_MONOTONIC, &spec);
+    //ms = spec.tv_nsec / 1.0e6; // convert nanoseconds to milliseconds
+    //return ms;
+    return 1.0;
 }
 
 /**
