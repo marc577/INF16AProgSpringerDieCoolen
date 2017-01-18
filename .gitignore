@@ -11,4 +11,14 @@
 
 *.layout
 
+<<<<<<< Updated upstream
 *.o
+=======
+Springerproblem.layout
+>>>>>>> Stashed changes
+
+Springerproblem.depend
+
+Springerproblem.layout
+
+Springerproblem.depend

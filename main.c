@@ -167,6 +167,38 @@ int verifyFeld(int argColumn, int argRow){
  */
 void initPossibleFollowersForField(Field *argField){
     int counter = 0;
+    int newCol;
+    int newRow;
+    for (int a = 1; a <= 8; a++) {
+        if (a <= 4) {
+            newRow = 2;
+            newCol = 1;
+        } else {
+            newRow = 1;
+            newCol = 2;
+        }
+        if (a <= 2 || a == 5 || a == 6) {
+            newRow = newRow*-1;
+        }
+        if (a%2==0) {
+            newCol = newCol*-1;
+        }
+        newCol = argField->column + newCol;
+        newRow = argField->row + newRow;
+        if(verifyFeld(newCol, newRow) != 0){
+            argField->reachableFields[counter] = &board.fields[newRow][newCol];
+            counter += 1;
+        }
+    }
+    argField->cReachableFields = counter;
+}
+
+/**
+ * Initializes the reachable followers of one field.
+ * @param argField A field pointer to the field whose followers will be initialized.
+
+void initPossibleFollowersForField(Field *argField){
+    int counter = 0;
     int startRow = argField->row;
     int startCol = argField->column;
 
@@ -222,7 +254,7 @@ void initPossibleFollowersForField(Field *argField){
     argField->cReachableFields = counter;
 
 }
-
+ */
 /**
  * Initializes the global variable 'board' and it's fields.
  */
