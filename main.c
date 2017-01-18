@@ -8,15 +8,26 @@
 - Ausgabe in Textdatei
 - Degubmodus
 - vairable Brettgroesse
-    ->maxBoardSize mit Pointer machen, damit der Wert zur Laufzeit eingelesen werden kann
+    ->MAX_BOARD_SIZE mit Pointer machen, damit der Wert zur Laufzeit eingelesen werden kann
     ->Problem, wenn die Variable keine Konstante ist, kann kein Array initialisiert werden
+- Defines uppercase only
 ***************************************/
 
 /**
- * Global variable maxBoardSize
+ * Global variable MAX_BOARD_SIZE
  * Sets the max number of fields in the board
  **/
-#define maxBoardSize 8
+#define MAX_BOARD_SIZE 8
+#define MAX_COLUMN (MAX_BOARD_SIZE + 64)
+#define MAX_BOARD_FIELD (MAX_BOARD_SIZE*MAX_BOARD_SIZE)
+
+/**
+ * Global variable ANSI_COLOR
+ * Mark first and last field.
+ **/
+#define ANSI_COLOR_RED     "\x1b[31m"
+#define ANSI_COLOR_GREEN   "\x1b[32m"
+#define ANSI_COLOR_RESET   "\x1b[0m"
 
 /**
  * Struct Field
@@ -24,9 +35,9 @@
  * @property row The row index of the board.
  * @property column The column index in the board.
  * @property value The couter value of the knight's steps.
- * @property cPossMoves
- * @property pFields
- * @property lastTry
+ * @property cPossMoves Number of possible follower fields.
+ * @property pFields References to the possible follower fields.
+ * @property lastTry Index of last tried follower.
  * @property desc Column-Row representation of the field in the borad (human readable)
  **/
 struct Field {
@@ -45,7 +56,7 @@ typedef struct Field Field;
  * Holds a number of fields.
  **/
 struct Chessboard {
-    struct Field fields[maxBoardSize][maxBoardSize];
+    struct Field fields[MAX_BOARD_SIZE][MAX_BOARD_SIZE];
 };
 typedef struct Chessboard Chessboard;
 
@@ -70,10 +81,16 @@ Field getStartPosition() {
     int inputVerifyer = 0;
     char inputCol;
     do{
-        printf("Bitte column eingeben (A-H): ");
+        printf("Bitte Spalte eingeben (A-%c ; X fuer alle): \n", MAX_COLUMN);
         scanf("%c", &inputCol);
         inputCol = toupper(inputCol);
-        inputVerifyer = (inputCol >= 'A' && inputCol <= 'H');
+        if (inputCol == 'X') {
+            retVal.column = -1;
+            retVal.row = -1;
+            return retVal;
+        }
+
+        inputVerifyer = (inputCol >= 'A' && inputCol <= MAX_COLUMN);
         if(inputVerifyer == 0){
             printf("Eingabe falsch.\n");
         }
@@ -83,9 +100,9 @@ Field getStartPosition() {
     int inputRow;
     inputVerifyer = 0;
     do{
-        printf("Bitte Reihe eingeben (1-%d): ", maxBoardSize);
+        printf("Bitte Reihe eingeben (1-%d): ", MAX_BOARD_SIZE);
         scanf("%d", &inputRow);
-        inputVerifyer = (inputRow >= 1 && inputRow <= maxBoardSize);
+        inputVerifyer = (inputRow >= 1 && inputRow <= MAX_BOARD_SIZE);
         if(inputVerifyer == 0){
             printf("Eingabe falsch.\n");
         }
@@ -141,7 +158,7 @@ void sortPossibleFollowerArray(Field *argField) {
  * @return Retuns 1 if the column and row describe a valid field, otherwise 0
  */
 int verifyFeld(int column, int row){
-    if(column >= 0 && column < maxBoardSize && row >= 0 && row < maxBoardSize){
+    if(column >= 0 && column < MAX_BOARD_SIZE && row >= 0 && row < MAX_BOARD_SIZE){
         return 1;
     }
     return 0;
@@ -214,8 +231,8 @@ void initPossibleFollowersForField(Field *argField){
  * Initializes the global variable 'board' and its fields.
  */
 void initBoard(){
-    for (int row = 0; row < maxBoardSize; row++){
-        for(int col = 0; col < maxBoardSize; col++){
+    for (int row = 0; row < MAX_BOARD_SIZE; row++){
+        for(int col = 0; col < MAX_BOARD_SIZE; col++){
             Field field;
             field.row = row;
             field.column = col;
@@ -227,14 +244,14 @@ void initBoard(){
         }
     }
 
-    for (int row = 0; row < maxBoardSize; row++){
-        for(int col = 0; col < maxBoardSize; col++){
+    for (int row = 0; row < MAX_BOARD_SIZE; row++){
+        for(int col = 0; col < MAX_BOARD_SIZE; col++){
             Field *fieldPointer = &board.fields[row][col];
             initPossibleFollowersForField(fieldPointer);
         }
     }
-    for (int row = 0; row < maxBoardSize; row++){
-        for(int col = 0; col < maxBoardSize; col++){
+    for (int row = 0; row < MAX_BOARD_SIZE; row++){
+        for(int col = 0; col < MAX_BOARD_SIZE; col++){
             Field *fieldPointer = &board.fields[row][col];
             sortPossibleFollowerArray(fieldPointer);
         }
@@ -242,17 +259,43 @@ void initBoard(){
 }
 
 /**
+ * Prints the column for the board.
+ */
+void printBoardHead(){
+    char head[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'};
+    printf("   ");
+    for(int h = 0; h < MAX_BOARD_SIZE; h++){
+        printf(" %c", head[h]);
+        if(h != MAX_BOARD_SIZE - 1){
+            printf("|");
+        }
+    }
+    printf("\n");
+}
+
+/**
  * Prints the global variable 'board' with the knight's step
- * -1 => The knight did not reched the field yet.
+ * -1 => The knight did not reached the field yet.
  */
 void printBoard(){
-    for (int row = 0; row < maxBoardSize; row++){
-        for(int col = 0; col < maxBoardSize; col++){
-            printf("%02d|", board.fields[row][col].value);
+    printBoardHead();
+    for (int row = 0; row < MAX_BOARD_SIZE; row++){
+        printf("%d |", row + 1);
+        for(int col = 0; col < MAX_BOARD_SIZE; col++){
+            if(board.fields[row][col].value == 0){
+                printf(ANSI_COLOR_GREEN "%02d" ANSI_COLOR_RESET "|", board.fields[row][col].value);
+            }else if(board.fields[row][col].value == MAX_BOARD_FIELD - 1){
+                printf(ANSI_COLOR_RED "%02d" ANSI_COLOR_RESET "|", board.fields[row][col].value);
+            }else{
+                printf("%02d|", board.fields[row][col].value);
+            }
         }
+        printf("  %d", row + 1);
         printf("\n");
     }
+    printBoardHead();
 }
+
 
 /**
  * Searches for a field with a specific knight step in board.
@@ -260,8 +303,8 @@ void printBoard(){
  * @return Returns a field pointer to the searched field. If no field was found returns NULL.
  */
 Field* getFieldAt(int position) {
-    for (int i = 0; i < maxBoardSize; i++) {
-        for (int j = 0; j < maxBoardSize; j++) {
+    for (int i = 0; i < MAX_BOARD_SIZE; i++) {
+        for (int j = 0; j < MAX_BOARD_SIZE; j++) {
             if (board.fields[i][j].value == position) {
                 return (Field*) &(board.fields[i][j]);
             }
@@ -270,62 +313,18 @@ Field* getFieldAt(int position) {
     return NULL;
 }
 
-/** Global stopwatch variables **/
-double start_t_millis, end_t_millis;
-
 /**
- * Returns the time in millis from the clock time.
- */
-double get_time_millis(){
-    //double ms; // millis to return
-    //struct timespec spec;
-    //clock_gettime(CLOCK_MONOTONIC, &spec);
-    //ms = spec.tv_nsec / 1.0e6; // convert nanoseconds to milliseconds
-    //return ms;
-    return 1.0;
-}
-
-/**
- * Saves the current time in millis in the global variable 'start_t_millis'.
- * (calls get_time_millis)
- */
-void startStopwatch(){
-    start_t_millis = get_time_millis();
-}
-
-/**
- * Saves the current time in millis in the global variable 'end_t_millis'.
- * (calls get_time_millis)
- */
-void stopStopwatch(){
-    end_t_millis = get_time_millis();
-}
-
-/**
- * Prints the elapsed time between the call 'startStopwatch'
- * and 'stopStopwatch' in millis.
- */
-void printStopwatch(){
-    printf("Dauer: %lf Millisekunden. \n", end_t_millis - start_t_millis);
-}
-
-/**
- * Starts the knights walk.
+ * Starts the knights walk and searches for a way where the knight
+ * can jump to the startfield again.
  * @param startField The field from which the walk begins.
  */
-double walkAndGoToStartPos(Field startField){
-    double runs = 0;
-    startStopwatch();
+void walkAndGoToStartPos(Field startField){
     int walkCounter = 0;
     Field* cField = &(board.fields[startField.row][startField.column]);
-    int maxWalks = maxBoardSize * maxBoardSize;
      // start walk
-    for(int fieldPos= 0 ; fieldPos < maxWalks; fieldPos++){
+    for(int fieldPos= 0 ; fieldPos < MAX_BOARD_FIELD; fieldPos++){
         int foundnextField = -1;
         Field* nextField;
-        //printf("cFeld: %c%c \n", cField->desc[0],cField->desc[1]);
-        //printf("Hallo Daniel");
-        runs++;
         do{
             if(cField->lastTry >= cField->cPossMoves){
                 cField->lastTry = 0;
@@ -342,12 +341,12 @@ double walkAndGoToStartPos(Field startField){
         if(foundnextField == -1){
             cField->value = -1;
             walkCounter--;
-            cField = getFieldAt(walkCounter);
-            cField->lastTry += 1;
-            if(cField == NULL){
+            if(walkCounter < 0){
                 printf("Kein Weg gefunden!\n");
                 break;
             }
+            cField = getFieldAt(walkCounter);
+            cField->lastTry += 1;
             fieldPos = walkCounter;
             //printf("Keine Moeglichkeit mehr.Gehe eins zurŸck!\n");
 
@@ -356,7 +355,7 @@ double walkAndGoToStartPos(Field startField){
             cField->value = walkCounter;
             walkCounter += 1;
             cField = nextField;
-            if (walkCounter == maxWalks - 1) {
+            if (walkCounter == MAX_BOARD_FIELD - 1) {
                 cField->value = walkCounter;
                 int boStartFieldFounded = -1;
                 for (int posI = cField->lastTry; posI < cField->cPossMoves; posI++) {
@@ -382,24 +381,19 @@ double walkAndGoToStartPos(Field startField){
         //printf("Aktuelle Feldposition: %d\n", fieldPos);
     }
     // end walk
-    stopStopwatch();
-    return runs;
 }
 
 /**
  * Starts the knights walk.
  * @param startField The field from which the walk begins.
  */
-void walk(Field startField){
-    startStopwatch();
+/*void walk(Field startField){
     int walkCounter = 0;
 
     Field* cField = &(board.fields[startField.row][startField.column]);
      // start walk
-
-    int maxWalks = maxBoardSize * maxBoardSize;
     //return;
-    for(int fieldPos= 0 ; fieldPos < maxWalks; fieldPos++){
+    for(int fieldPos= 0 ; fieldPos < MAX_BOARD_FIELD; fieldPos++){
         int foundnextField = -1;
         Field* nextField;
         do{
@@ -433,51 +427,27 @@ void walk(Field startField){
             cField->value = walkCounter;
             walkCounter += 1;
             cField = nextField;
-            if (walkCounter == (maxWalks - 1)) {
+            if (walkCounter == (MAX_BOARD_FIELD - 1)) {
                 cField->value = walkCounter;
             }
         }
         //printf("Aktuelle Feldposition: %d\n", fieldPos);
     }
-
     // end walk
-    stopStopwatch();
-}
+}*/
 
-int main() {
-
-    for (int rowI = 0; rowI < maxBoardSize; rowI++) {
-        for (int colI = 0; colI < maxBoardSize; colI++) {
-            printf("\n##### Springerproblem #####\n");
-            initBoard();
-            printf("\n\nSchachbrett initialisiert\n");
-            Field startField;
-            startField.column = colI;
-            startField.row = rowI;
-            startField.desc[0] = startField.column + 65;
-            startField.desc[1] = (startField.row + 1) +'0';
-
-            printf("Springer laeuft von %s aus los...", startField.desc);
-            //walk(startField);
-            walkAndGoToStartPos(startField);
-            printf("\n... laufen abgeschlossen.");
-            //printStopwatch();
-            printf("\n");
-            // Schachfield nach dem laufen
-            printBoard();
-
-
-        }
-    }
-    return 0;
+void prettyPrintedWalk(Field argField) {
+    printf("Springer laeuft von %c%c aus los...\n", argField.desc[0], argField.desc[1]);
+    walkAndGoToStartPos(argField);
+    printf("\n");
+    printBoard();
+    printf("\n... laufen abgeschlossen.");
 }
 
 /**
  * Starts the programm.
  */
-
-
-/*int main()
+int main()
 {
     printf("\n##### Springerproblem #####\n");
 
@@ -486,16 +456,24 @@ int main() {
     printBoard();
 
     Field startField = getStartPosition();
-
-    printf("\n\nSpringer laeuft von %s aus los...", startField.desc);
-    //walk(startField);
-    //walkAndGoToStartPos(startField);
-    walk(startField);
-    printf("\n... laufen abgeschlossen.");
-    printStopwatch();
-    printf("\n");
-    // Schachfield nach dem laufen
-    printBoard();
+    if (startField.row == -1) {
+        for (int rowI = 0; rowI < MAX_BOARD_SIZE; rowI++) {
+            for (int colI = 0; colI < MAX_BOARD_SIZE; colI++) {
+                Field startField;
+                startField.column = colI;
+                startField.row = rowI;
+                startField.desc[0] = startField.column + 65;
+                startField.desc[1] = (startField.row + 1) +'0';
+                prettyPrintedWalk(startField);
+                if(!(rowI == MAX_BOARD_SIZE - 1 && colI == MAX_BOARD_SIZE - 1)){
+                    initBoard();
+                    printf("\n\nSchachbrett neu initialisiert\n");
+                }
+            }
+        }
+    } else {
+        prettyPrintedWalk(startField);
+    }
     return 0;
-}*/
+}
 
