@@ -222,68 +222,7 @@ void initPossibleFollowersForField(Field *argField){
     argField->cReachableFields = counter;
 }
 
-/**
- * Initializes the reachable followers of one field.
- * @param argField A field pointer to the field whose followers will be initialized.
 
-void initPossibleFollowersForField(Field *argField){
-    int counter = 0;
-    int startRow = argField->row;
-    int startCol = argField->column;
-
-    int newCol = startCol + 2;
-    int newRow = startRow + 1;
-    if(verifyFeld(newCol, newRow) != 0){
-        argField->reachableFields[counter] = &board.fields[newRow][newCol];
-        counter += 1;
-    }
-    newCol = startCol + 2;
-    newRow = startRow - 1;
-    if(verifyFeld(newCol, newRow) != 0){
-        argField->reachableFields[counter] = &board.fields[newRow][newCol];
-        counter += 1;
-    }
-    newCol = startCol - 2;
-    newRow = startRow + 1;
-    if(verifyFeld(newCol, newRow) != 0){
-        argField->reachableFields[counter] = &board.fields[newRow][newCol];
-        counter += 1;
-    }
-    newCol = startCol - 2;
-    newRow = startRow - 1;
-    if(verifyFeld(newCol, newRow) != 0){
-        argField->reachableFields[counter] = &board.fields[newRow][newCol];
-        counter += 1;
-    }
-    newCol = startCol + 1;
-    newRow = startRow - 2;
-    if(verifyFeld(newCol, newRow) != 0){
-        argField->reachableFields[counter] = &board.fields[newRow][newCol];
-        counter += 1;
-    }
-    newCol = startCol + 1;
-    newRow = startRow + 2;
-    if(verifyFeld(newCol, newRow) != 0){
-        argField->reachableFields[counter] = &board.fields[newRow][newCol];
-        counter += 1;
-    }
-    newCol = startCol - 1;
-    newRow = startRow + 2;
-    if(verifyFeld(newCol, newRow) != 0){
-        argField->reachableFields[counter] = &board.fields[newRow][newCol];
-        counter += 1;
-    }
-    newCol = startCol - 1;
-    newRow = startRow - 2;
-    if(verifyFeld(newCol, newRow) != 0){
-        argField->reachableFields[counter] = &board.fields[newRow][newCol];
-        counter += 1;
-    }
-
-    argField->cReachableFields = counter;
-
-}
- */
 /**
  * Initializes the global variable 'board' and it's fields.
  */
@@ -484,7 +423,7 @@ double walkAndGoToStartPos(Field argStartField){
     return 0.0;
 }
 
-/** für Aufgabenteil b
+/** für Aufgabenteil a und b
  * Starts the knights walk.
  * @param argStartField The field from which the walk begins.
  */
