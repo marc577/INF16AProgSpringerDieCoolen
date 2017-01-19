@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include <time.h>
 #include <ctype.h>
+#include <windows.h>
 
 /**
  * Springerproblem
@@ -24,6 +25,7 @@
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_GREEN   "\x1b[32m"
 #define ANSI_COLOR_RESET   "\x1b[0m"
+#define FOREGROUND_WHITE   7
 
 /**
  * print carriage return
@@ -316,9 +318,15 @@ void printBoard(){
         for(int col = 0; col < MAX_BOARD_SIZE; col++){
             // print startfield green and last field red
             if(board.fields[row][col].value == 0){
-                printLogOut(ANSI_COLOR_GREEN "%02d" ANSI_COLOR_RESET "|", board.fields[row][col].value);
+                SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),FOREGROUND_GREEN );
+                printLogOut("%02d", board.fields[row][col].value);
+                SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),FOREGROUND_WHITE);
+                printLogOut("|");
             }else if(board.fields[row][col].value == MAX_BOARD_FIELD - 1){
-                printLogOut(ANSI_COLOR_RED "%02d" ANSI_COLOR_RESET "|", board.fields[row][col].value);
+                SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),FOREGROUND_RED );
+                printLogOut("%02d", board.fields[row][col].value);
+                SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),FOREGROUND_WHITE);
+                printLogOut("|");
             }else{
                 printLogOut("%02d|", board.fields[row][col].value);
             }
