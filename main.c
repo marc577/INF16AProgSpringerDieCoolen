@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <time.h>
 #include <ctype.h>
 
@@ -27,7 +28,7 @@
 /**
  * print carriage return
  */
-#define CRLF printf("\n");
+#define CRLF printLogOut("\n");
 
 /**
  * Struct Field
@@ -65,6 +66,7 @@ typedef struct Chessboard Chessboard;
  **/
 Chessboard board;
 
+FILE *logFile;
 /**
  * Reads and verifies the user's input to get the
  * start position.
@@ -74,11 +76,11 @@ Field getStartPosition() {
 
     Field retVal;
 
-    printf("Startposition: \n");
+    printLogOut("Startposition: \n");
     int inputVerifyer = 0;
     char inputCol;
     do{
-        printf("Bitte Spalte eingeben (A-%c ; X fuer alle): \n", MAX_COLUMN);
+        printLogOut("Bitte Spalte eingeben (A-%c ; X fuer alle): \n", MAX_COLUMN);
         scanf("%c", &inputCol);
         inputCol = toupper(inputCol);
         if (inputCol == 'X') {
@@ -89,7 +91,7 @@ Field getStartPosition() {
 
         inputVerifyer = (inputCol >= 'A' && inputCol <= MAX_COLUMN);
         if(inputVerifyer == 0){
-            printf("Eingabe falsch.\n");
+            printLogOut("Eingabe falsch.\n");
         }
     }while( inputVerifyer == 0);
     retVal.column = inputCol - 65; // Convert char-column to number-columnt, e.q. A to 0
@@ -97,11 +99,11 @@ Field getStartPosition() {
     int inputRow;
     inputVerifyer = 0;
     do{
-        printf("Bitte Reihe eingeben (1-%d): ", MAX_BOARD_SIZE);
+        printLogOut("Bitte Reihe eingeben (1-%d): ", MAX_BOARD_SIZE);
         scanf("%d", &inputRow);
         inputVerifyer = (inputRow >= 1 && inputRow <= MAX_BOARD_SIZE);
         if(inputVerifyer == 0){
-            printf("Eingabe falsch.\n");
+            printLogOut("Eingabe falsch.\n");
         }
     }while( inputVerifyer == 0 );
     retVal.row = inputRow - 1;
@@ -119,11 +121,11 @@ Field getStartPosition() {
 void sortPossibleFollowerArray(Field *argField) {
 
     /*
-    printf("## Nachfolger von %s unsortiert: \n", argField->desc);
+    printLogOut("## Nachfolger von %s unsortiert: \n", argField->desc);
     for (int pos = 0; pos < argField->cReachableFields; pos++){
-        printf("%s -> mit %d Nachfolgern \n", ((Field *)argField->reachableFields[pos])->desc,((Field *)argField->reachableFields[pos])->cReachableFields);
+        printLogOut("%s -> mit %d Nachfolgern \n", ((Field *)argField->reachableFields[pos])->desc,((Field *)argField->reachableFields[pos])->cReachableFields);
     }
-    printf("##");
+    printLogOut("##");
     */
 
     for (int posOut = 0; posOut < argField->cReachableFields - 1; posOut++){
@@ -139,11 +141,11 @@ void sortPossibleFollowerArray(Field *argField) {
     }
 
     /*
-    printf("## Nachfolger von %s sortiert: \n", argField->desc);
+    printLogOut("## Nachfolger von %s sortiert: \n", argField->desc);
     for (int pos = 0; pos < argField->cReachableFields; pos++){
-        printf("%s -> mit %d Nachfolgern \n", ((Field *)argField->reachableFields[pos])->desc,((Field *)argField->reachableFields[pos])->cReachableFields);
+        printLogOut("%s -> mit %d Nachfolgern \n", ((Field *)argField->reachableFields[pos])->desc,((Field *)argField->reachableFields[pos])->cReachableFields);
     }
-    printf("## \n\n");
+    printLogOut("## \n\n");
     */
 }
 
@@ -293,11 +295,11 @@ void initBoard(){
  * Prints the letters of the chessboard.
  */
 void printBoardHead(){
-    printf("   ");
+    printLogOut("   ");
     for(int h = 65; h < 65 + MAX_BOARD_SIZE; h++){
-        printf(" %c", h);
+        printLogOut(" %c", h);
         if(h != MAX_BOARD_SIZE - 1){
-            printf("|");
+            printLogOut("|");
         }
     }
     CRLF
@@ -310,18 +312,18 @@ void printBoardHead(){
 void printBoard(){
     printBoardHead();
     for (int row = 0; row < MAX_BOARD_SIZE; row++){
-        printf("%d |", row + 1);
+        printLogOut("%d |", row + 1);
         for(int col = 0; col < MAX_BOARD_SIZE; col++){
             // print startfield green and last field red
             if(board.fields[row][col].value == 0){
-                printf(ANSI_COLOR_GREEN "%02d" ANSI_COLOR_RESET "|", board.fields[row][col].value);
+                printLogOut(ANSI_COLOR_GREEN "%02d" ANSI_COLOR_RESET "|", board.fields[row][col].value);
             }else if(board.fields[row][col].value == MAX_BOARD_FIELD - 1){
-                printf(ANSI_COLOR_RED "%02d" ANSI_COLOR_RESET "|", board.fields[row][col].value);
+                printLogOut(ANSI_COLOR_RED "%02d" ANSI_COLOR_RESET "|", board.fields[row][col].value);
             }else{
-                printf("%02d|", board.fields[row][col].value);
+                printLogOut("%02d|", board.fields[row][col].value);
             }
         }
-        printf("  %d", row + 1);
+        printLogOut("  %d", row + 1);
         CRLF
     }
     printBoardHead();
@@ -379,7 +381,7 @@ void walkAndGoToStartPos(Field argStartField){
             walkCounter--;
             // Exitcondition
             if(walkCounter < 0){
-                printf("Kein Weg gefunden!\nFuer dieses Startfeld gibt es keine Loesung.\n");
+                printLogOut("Kein Weg gefunden!\nFuer dieses Startfeld gibt es keine Loesung.\n");
                 break;
             }
             cField = getFieldAt(walkCounter);
@@ -445,9 +447,9 @@ void walkAndGoToStartPos(Field argStartField){
         if(foundnextField == -1){
             cField->value = -1;
             walkCounter--;
-            //printf("WalkCounter = %d \n", walkCounter);
+            //printLogOut("WalkCounter = %d \n", walkCounter);
             if(walkCounter < 0){
-                printf("Kein Weg gefunden!\n");
+                printLogOut("Kein Weg gefunden!\n");
                 break;
             }
 
@@ -463,7 +465,7 @@ void walkAndGoToStartPos(Field argStartField){
                 cField->value = walkCounter;
             }
         }
-        //printf("Aktuelle Feldposition: %d\n", fieldPos);
+        //printLogOut("Aktuelle Feldposition: %d\n", fieldPos);
     }
     // end walk
 }*/
@@ -473,11 +475,40 @@ void walkAndGoToStartPos(Field argStartField){
  * @param argField The field where the walk begins.
  */
 void startWalkFromField(Field argField) {
-    printf("Springer laeuft von %c%c aus los...\n", argField.desc[0], argField.desc[1]);
+    printLogOut("Springer laeuft von %c%c aus los...\n", argField.desc[0], argField.desc[1]);
     walkAndGoToStartPos(argField);
     CRLF
     printBoard();
-    printf("\n... laufen abgeschlossen.");
+    printLogOut("\n... laufen abgeschlossen.");
+}
+
+/**
+ * Starts logging content to file
+ */
+void startLogging() {
+    logFile = fopen("Springer.txt", "w+");
+}
+
+/**
+ * writes to Logfile and STDOUT
+*/
+void printLogOut(const char *restrict msg, ...)
+{
+    va_list args;
+
+    va_start(args, msg);
+    vfprintf(logFile, msg, args);
+    va_end(args);
+    va_start(args, msg);
+    vfprintf(stdout, msg, args);
+    va_end(args);
+}
+
+/**
+ * Starts logging content to file
+ */
+void stopLogging() {
+    fclose(logFile);
 }
 
 /**
@@ -485,9 +516,10 @@ void startWalkFromField(Field argField) {
  */
 int main()
 {
-    printf("\n##### Springerproblem #####\n");
+    startLogging();
+    printLogOut("\n##### Springerproblem #####\n");
     initBoard();
-    printf("\n\nSchachbrett initialisiert: \n\n");
+    printLogOut("\n\nSchachbrett initialisiert: \n\n");
     printBoard();
 
     Field startField = getStartPosition();
@@ -502,13 +534,14 @@ int main()
                 startWalkFromField(startField);
                 if(!(rowI == MAX_BOARD_SIZE - 1 && colI == MAX_BOARD_SIZE - 1)){
                     initBoard();
-                    printf("\n\nSchachbrett neu initialisiert\n");
+                    printLogOut("\n\nSchachbrett neu initialisiert\n");
                 }
             }
         }
     } else {
         startWalkFromField(startField);
     }
+    stopLogging();
     return 0;
 }
 
