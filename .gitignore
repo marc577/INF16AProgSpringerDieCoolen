@@ -27,3 +27,7 @@ bin/Debug/Springerproblem.exe
 *.exe
 *.o
 *.layout
+
+bin/Debug/Springer.txt
+
+Springer.txt
