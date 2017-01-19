@@ -4,7 +4,6 @@
 #include <time.h>
 #include <sys/time.h>
 #include <ctype.h>
-#include <windows.h>
 
 /**
  * Springerproblem
@@ -23,10 +22,20 @@
 /**
  * ANSI_COLORS for marking first and last field.
  **/
-#define ANSI_COLOR_RED     "\x1b[31m"
-#define ANSI_COLOR_GREEN   "\x1b[32m"
-#define ANSI_COLOR_RESET   "\x1b[0m"
-#define FOREGROUND_WHITE   7
+#ifdef _WIN32
+    #include <windows.h>
+    #define FOREGROUND_WHITE   7
+#endif
+
+#ifdef __APPLE__
+    #define ANSI_COLOR_RED     "\x1b[31m"
+    #define ANSI_COLOR_GREEN   "\x1b[32m"
+    #define ANSI_COLOR_RESET   "\x1b[0m"
+#endif
+
+
+
+
 
 /**
  * print carriage return
@@ -70,6 +79,21 @@ typedef struct Chessboard Chessboard;
 Chessboard board;
 
 FILE *logFile;
+/**
+ * writes to Logfile and STDOUT
+ */
+void printLogOut(const char *restrict msg, ...)
+{
+    va_list args;
+
+    va_start(args, msg);
+    vfprintf(logFile, msg, args);
+    va_end(args);
+    va_start(args, msg);
+    vfprintf(stdout, msg, args);
+    va_end(args);
+}
+
 /**
  * Reads and verifies the user's input to get the
  * start position.
@@ -319,14 +343,28 @@ void printBoard(){
         for(int col = 0; col < MAX_BOARD_SIZE; col++){
             // print startfield green and last field red
             if(board.fields[row][col].value == 0){
-                SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),FOREGROUND_GREEN );
-                printLogOut("%02d", board.fields[row][col].value);
-                SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),FOREGROUND_WHITE);
+                #ifdef __APPLE__
+                    printf(ANSI_COLOR_GREEN);
+                    printLogOut("%02d" , board.fields[row][col].value);
+                    printf(ANSI_COLOR_RESET);
+                #endif // unix
+                #ifdef _WIN32
+                    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),FOREGROUND_GREEN );
+                    printLogOut("%02d", board.fields[row][col].value);
+                    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),FOREGROUND_WHITE);
+                #endif // _WIN32
                 printLogOut("|");
             }else if(board.fields[row][col].value == MAX_BOARD_FIELD - 1){
-                SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),FOREGROUND_RED );
-                printLogOut("%02d", board.fields[row][col].value);
-                SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),FOREGROUND_WHITE);
+                #ifdef __APPLE__
+                    printf(ANSI_COLOR_RED);
+                    printLogOut("%02d", board.fields[row][col].value);
+                    printf(ANSI_COLOR_RESET);
+                #endif // unix
+                #ifdef _WIN32
+                    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),FOREGROUND_RED );
+                    printLogOut("%02d", board.fields[row][col].value);
+                    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),FOREGROUND_WHITE);
+                #endif // _WIN32
                 printLogOut("|");
             }else{
                 printLogOut("%02d|", board.fields[row][col].value);
@@ -362,9 +400,11 @@ Field* getFieldAt(int argPosition) {
  */
 double walkAndGoToStartPos(Field argStartField){
     int walkCounter = 0;
-    SYSTEMTIME t;
-    SYSTEMTIME t1;
-    GetSystemTime(&t);
+    #ifdef _WIN32
+        SYSTEMTIME t;
+        SYSTEMTIME t1;
+        GetSystemTime(&t);
+    #endif
     Field* cField = &(board.fields[argStartField.row][argStartField.column]);
      // start walk
     for(int fieldPos= 0 ; fieldPos < MAX_BOARD_FIELD; fieldPos++){
@@ -427,6 +467,7 @@ double walkAndGoToStartPos(Field argStartField){
             }
         }
     } //end for(int fieldPos= 0 ; fieldPos < MAX_BOARD_FIELD; fieldPos++)
+    #ifdef _WIN32
     GetSystemTime(&t1);
     double elapsedMs=((t1.wMilliseconds)-(t.wMilliseconds));
     if ((t1.wSecond-t.wSecond)!= 0){
@@ -439,6 +480,8 @@ double walkAndGoToStartPos(Field argStartField){
         elapsedMs = elapsedMs + ((t1.wSecond-t.wSecond)*1000);
     }
     return elapsedMs;
+    #endif
+    return 0.0;
 }
 
 /** für Aufgabenteil b
@@ -500,10 +543,14 @@ double walkAndGoToStartPos(Field argStartField){
  */
 void startWalkFromField(Field argField) {
     printLogOut("Springer laeuft von %c%c aus los...\n", argField.desc[0], argField.desc[1]);
-    double walkTime= walkAndGoToStartPos(argField);
+    double walkTime = walkAndGoToStartPos(argField);
     CRLF
     printBoard();
-    printLogOut("\n... laufen innerhalb von %0.0lf Millisekunden abgeschlossen.", walkTime);
+    #ifdef _WIN32
+        printLogOut("\n... laufen innerhalb von %0.0lf Millisekunden abgeschlossen.", walkTime);
+    #else
+        printLogOut("\n... laufen abgeschlossen.");
+    #endif
 }
 
 /**
@@ -514,40 +561,10 @@ void startLogging() {
 }
 
 /**
- * writes to Logfile and STDOUT
-*/
-void printLogOut(const char *restrict msg, ...)
-{
-    va_list args;
-
-    va_start(args, msg);
-    vfprintf(logFile, msg, args);
-    va_end(args);
-    va_start(args, msg);
-    vfprintf(stdout, msg, args);
-    va_end(args);
-}
-
-/**
  * Starts logging content to file
  */
 void stopLogging() {
     fclose(logFile);
-}
-
-int startTimestamp(){
-    time_t now;
-    struct tm *tm;
-
-    now = time(0);
-    if ((tm = localtime (&now)) == NULL) {
-        printLogOut("Zeit konnte nicht initialisiert werden!\n");
-        return 1;
-    }
-    printf ("%04d-%02d-%02d %02d:%02d:%02d\n",
-        tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
-        tm->tm_hour, tm->tm_min, tm->tm_sec);
-    return 0;
 }
 
 /**

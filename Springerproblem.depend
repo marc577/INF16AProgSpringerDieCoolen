@@ -3,11 +3,14 @@
 	<stdio.h>
 	<stdlib.h>
 
-1484745841 source:/Users/alexanderkrieg/Developer/Development/INF16AProgSpringerDieCoolen/main.c
+1484828806 source:/Users/alexanderkrieg/Developer/Development/INF16AProgSpringerDieCoolen/main.c
 	<stdio.h>
 	<stdlib.h>
+	<stdarg.h>
 	<time.h>
+	<sys/time.h>
 	<ctype.h>
+	<windows.h>
 
 1484758338 source:/Users/danielabel/Documents/Studium/GitVZ/Springerfiguren/INF16AProgSpringerDieCoolen/main.c
 	<stdio.h>
