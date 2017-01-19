@@ -31,3 +31,5 @@ bin/Debug/Springerproblem.exe
 bin/Debug/Springer.txt
 
 Springer.txt
+*.o
+Springerproblem.layout

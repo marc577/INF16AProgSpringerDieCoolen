@@ -77,7 +77,7 @@ typedef struct Chessboard Chessboard;
  * Global variable board
  **/
 Chessboard board;
-
+char inputTask;
 FILE *logFile;
 /**
  * writes to Logfile and STDOUT
@@ -103,36 +103,59 @@ Field getStartPosition() {
 
     Field retVal;
 
-    printLogOut("Startposition: \n");
     int inputVerifyer = 0;
     char inputCol;
-    do{
-        printLogOut("Bitte Spalte eingeben (A-%c ; X fuer alle): \n", MAX_COLUMN);
-        scanf("%c", &inputCol);
-        inputCol = toupper(inputCol);
-        if (inputCol == 'X') {
-            retVal.column = -1;
-            retVal.row = -1;
-            return retVal;
-        }
-
-        inputVerifyer = (inputCol >= 'A' && inputCol <= MAX_COLUMN);
-        if(inputVerifyer == 0){
-            printLogOut("Eingabe falsch.\n");
-        }
-    }while( inputVerifyer == 0);
-    retVal.column = inputCol - 65; // Convert char-column to number-columnt, e.q. A to 0
-
     int inputRow;
-    inputVerifyer = 0;
+
+    printLogOut("\nA. Das Programm gibt fuer alle Felder eine Loesung aus.\nB. Der Benutzer waehlt das Startfeld, das Programm sucht einen Loesungsweg ohne zum Start zurueck zu kehren.\nC. Der Benutzer waehlt das Startfeld, das Programm sucht eine Loesung, die im Ursprung endet.\n");
+
     do{
-        printLogOut("Bitte Reihe eingeben (1-%d): ", MAX_BOARD_SIZE);
-        scanf("%d", &inputRow);
-        inputVerifyer = (inputRow >= 1 && inputRow <= MAX_BOARD_SIZE);
+        printLogOut("Bitte auszufuehrende Aufgabe eingeben (A-C): \n");
+        scanf("%c", &inputTask);
+        fprintf(logFile, "%c\n", inputTask);
+        inputTask = toupper(inputTask);
+
+        inputVerifyer = (inputTask >= 'A' && inputTask <= 'C');
         if(inputVerifyer == 0){
             printLogOut("Eingabe falsch.\n");
         }
     }while( inputVerifyer == 0 );
+    if (inputTask == 'A') {
+            retVal.column = -1;
+            retVal.row = -1;
+            return retVal;
+    }
+
+    //Clearing input buffer
+    fseek(stdin,0,SEEK_END);
+
+    if(inputTask == 'B' | inputTask == 'C'){
+        printLogOut("Startposition: \n");
+        inputVerifyer = 0;
+        do{
+            printLogOut("Bitte Spalte eingeben (A-%c): \n", MAX_COLUMN);
+            scanf("%c", &inputCol);
+            fprintf(logFile, "%c\n", inputCol);
+            inputCol = toupper(inputCol);
+
+            inputVerifyer = (inputCol >= 'A' && inputCol <= MAX_COLUMN);
+            if(inputVerifyer == 0){
+                printLogOut("Eingabe falsch.\n");
+            }
+        }while( inputVerifyer == 0);
+        retVal.column = inputCol - 65; // Convert char-column to number-columnt, e.q. A to 0
+
+        inputVerifyer = 0;
+        do{
+            printLogOut("Bitte Reihe eingeben (1-%d): \n", MAX_BOARD_SIZE);
+            scanf("%d", &inputRow);
+            fprintf(logFile, "%i\n", inputRow);
+            inputVerifyer = (inputRow >= 1 && inputRow <= MAX_BOARD_SIZE);
+            if(inputVerifyer == 0){
+                printLogOut("Eingabe falsch.\n");
+            }
+        }while( inputVerifyer == 0 );
+    }
     retVal.row = inputRow - 1;
     retVal.desc[0] = retVal.column + 65;
     retVal.desc[1] = (retVal.row + 1) +'0';
@@ -427,12 +450,14 @@ double walkAndGoToStartPos(Field argStartField){
  * Starts the knights walk.
  * @param argStartField The field from which the walk begins.
  */
-/*void walk(Field argStartField){
+double walk(Field argStartField){
     int walkCounter = 0;
-
+    #ifdef _WIN32
+        SYSTEMTIME t;
+        SYSTEMTIME t1;
+        GetSystemTime(&t);
+    #endif
     Field* cField = &(board.fields[argStartField.row][argStartField.column]);
-     // start walk
-    //return;
     for(int fieldPos= 0 ; fieldPos < MAX_BOARD_FIELD; fieldPos++){
         int foundnextField = -1;
         Field* nextField;
@@ -473,16 +498,36 @@ double walkAndGoToStartPos(Field argStartField){
         }
         //printLogOut("Aktuelle Feldposition: %d\n", fieldPos);
     }
-    // end walk
-}*/
+    #ifdef _WIN32
+    GetSystemTime(&t1);
+    double elapsedMs=((t1.wMilliseconds)-(t.wMilliseconds));
+    if ((t1.wSecond-t.wSecond)!= 0){
+        if ((t1.wMinute-t.wMinute)!= 0){
+            if ((t1.wHour-t.wHour)!= 0){
+                    elapsedMs = elapsedMs + ((((t1.wHour-t.wHour)*1000)*60)*60);
+            }
+            elapsedMs = elapsedMs + (((t1.wMinute-t.wMinute)*1000)*60);
+        }
+        elapsedMs = elapsedMs + ((t1.wSecond-t.wSecond)*1000);
+    }
+    return elapsedMs;
+    #endif
+}
 
 /**
  * Starts the walk from a field.
  * @param argField The field where the walk begins.
  */
 void startWalkFromField(Field argField) {
+    double walkTime;
+
     printLogOut("Springer laeuft von %c%c aus los...\n", argField.desc[0], argField.desc[1]);
-    double walkTime = walkAndGoToStartPos(argField);
+    if (inputTask=='A'||inputTask=='B'){
+        walkTime = walk(argField);
+    }
+    if (inputTask=='C'){
+        walkTime = walkAndGoToStartPos(argField);
+    }
     CRLF
     printBoard();
     #ifdef _WIN32
