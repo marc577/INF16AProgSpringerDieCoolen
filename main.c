@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <time.h>
+#include <sys/time.h>
 #include <ctype.h>
 #include <windows.h>
 
@@ -359,8 +360,11 @@ Field* getFieldAt(int argPosition) {
  * can jump from the last position to the startfield back again.
  * @param argStartField The field from which the walk starts.
  */
-void walkAndGoToStartPos(Field argStartField){
+double walkAndGoToStartPos(Field argStartField){
     int walkCounter = 0;
+    SYSTEMTIME t;
+    SYSTEMTIME t1;
+    GetSystemTime(&t);
     Field* cField = &(board.fields[argStartField.row][argStartField.column]);
      // start walk
     for(int fieldPos= 0 ; fieldPos < MAX_BOARD_FIELD; fieldPos++){
@@ -423,6 +427,18 @@ void walkAndGoToStartPos(Field argStartField){
             }
         }
     } //end for(int fieldPos= 0 ; fieldPos < MAX_BOARD_FIELD; fieldPos++)
+    GetSystemTime(&t1);
+    double elapsedMs=((t1.wMilliseconds)-(t.wMilliseconds));
+    if ((t1.wSecond-t.wSecond)!= 0){
+        if ((t1.wMinute-t.wMinute)!= 0){
+            if ((t1.wHour-t.wHour)!= 0){
+                    elapsedMs = elapsedMs + ((((t1.wHour-t.wHour)*1000)*60)*60);
+            }
+            elapsedMs = elapsedMs + (((t1.wMinute-t.wMinute)*1000)*60);
+        }
+        elapsedMs = elapsedMs + ((t1.wSecond-t.wSecond)*1000);
+    }
+    return elapsedMs;
 }
 
 /** für Aufgabenteil b
@@ -484,10 +500,10 @@ void walkAndGoToStartPos(Field argStartField){
  */
 void startWalkFromField(Field argField) {
     printLogOut("Springer laeuft von %c%c aus los...\n", argField.desc[0], argField.desc[1]);
-    walkAndGoToStartPos(argField);
+    double walkTime= walkAndGoToStartPos(argField);
     CRLF
     printBoard();
-    printLogOut("\n... laufen abgeschlossen.");
+    printLogOut("\n... laufen innerhalb von %0.0lf Millisekunden abgeschlossen.", walkTime);
 }
 
 /**
@@ -517,6 +533,21 @@ void printLogOut(const char *restrict msg, ...)
  */
 void stopLogging() {
     fclose(logFile);
+}
+
+int startTimestamp(){
+    time_t now;
+    struct tm *tm;
+
+    now = time(0);
+    if ((tm = localtime (&now)) == NULL) {
+        printLogOut("Zeit konnte nicht initialisiert werden!\n");
+        return 1;
+    }
+    printf ("%04d-%02d-%02d %02d:%02d:%02d\n",
+        tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
+        tm->tm_hour, tm->tm_min, tm->tm_sec);
+    return 0;
 }
 
 /**
