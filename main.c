@@ -103,7 +103,7 @@ Field getStartPosition() {
 
     Field retVal;
 
-    int inputVerifyer = 0;
+    int inputVerifier = 0;
     char inputCol;
     int inputRow;
 
@@ -115,11 +115,11 @@ Field getStartPosition() {
         fprintf(logFile, "%c\n", inputTask);
         inputTask = toupper(inputTask);
 
-        inputVerifyer = (inputTask >= 'A' && inputTask <= 'C');
-        if(inputVerifyer == 0){
+        inputVerifier = (inputTask >= 'A' && inputTask <= 'C');
+        if(inputVerifier == 0){
             printLogOut("Eingabe falsch.\n");
         }
-    }while( inputVerifyer == 0 );
+    }while( inputVerifier == 0 );
     if (inputTask == 'A') {
             retVal.column = -1;
             retVal.row = -1;
@@ -131,30 +131,30 @@ Field getStartPosition() {
 
     if(inputTask == 'B' | inputTask == 'C'){
         printLogOut("Startposition: \n");
-        inputVerifyer = 0;
+        inputVerifier = 0;
         do{
             printLogOut("Bitte Spalte eingeben (A-%c): \n", MAX_COLUMN);
             scanf("%c", &inputCol);
             fprintf(logFile, "%c\n", inputCol);
             inputCol = toupper(inputCol);
 
-            inputVerifyer = (inputCol >= 'A' && inputCol <= MAX_COLUMN);
-            if(inputVerifyer == 0){
+            inputVerifier = (inputCol >= 'A' && inputCol <= MAX_COLUMN);
+            if(inputVerifier == 0){
                 printLogOut("Eingabe falsch.\n");
             }
-        }while( inputVerifyer == 0);
+        }while( inputVerifier == 0);
         retVal.column = inputCol - 65; // Convert char-column to number-columnt, e.q. A to 0
 
-        inputVerifyer = 0;
+        inputVerifier = 0;
         do{
             printLogOut("Bitte Reihe eingeben (1-%d): \n", MAX_BOARD_SIZE);
             scanf("%d", &inputRow);
             fprintf(logFile, "%i\n", inputRow);
-            inputVerifyer = (inputRow >= 1 && inputRow <= MAX_BOARD_SIZE);
-            if(inputVerifyer == 0){
+            inputVerifier = (inputRow >= 1 && inputRow <= MAX_BOARD_SIZE);
+            if(inputVerifier == 0){
                 printLogOut("Eingabe falsch.\n");
             }
-        }while( inputVerifyer == 0 );
+        }while( inputVerifier == 0 );
     }
     retVal.row = inputRow - 1;
     retVal.desc[0] = retVal.column + 65;
@@ -556,31 +556,54 @@ void stopLogging() {
  */
 int main()
 {
+    int inputVerifier=0;
+    char restart='J';
     startLogging();
-    printLogOut("\n##### Springerproblem #####\n");
-    initBoard();
-    printLogOut("\n\nSchachbrett initialisiert: \n\n");
-    printBoard();
+    do{
+        printLogOut("\n##### Springerproblem #####\n");
+        initBoard();
+        printLogOut("\n\nSchachbrett initialisiert: \n\n");
+        printBoard();
 
-    Field startField = getStartPosition();
-    if (startField.row == -1) {
-        for (int rowI = 0; rowI < MAX_BOARD_SIZE; rowI++) {
-            for (int colI = 0; colI < MAX_BOARD_SIZE; colI++) {
-                Field startField;
-                startField.column = colI;
-                startField.row = rowI;
-                startField.desc[0] = startField.column + 65;
-                startField.desc[1] = (startField.row + 1) +'0';
-                startWalkFromField(startField);
-                if(!(rowI == MAX_BOARD_SIZE - 1 && colI == MAX_BOARD_SIZE - 1)){
-                    initBoard();
-                    printLogOut("\n\nSchachbrett neu initialisiert\n");
+        Field startField = getStartPosition();
+        if (startField.row == -1) {
+            for (int rowI = 0; rowI < MAX_BOARD_SIZE; rowI++) {
+                for (int colI = 0; colI < MAX_BOARD_SIZE; colI++) {
+                    Field startField;
+                    startField.column = colI;
+                    startField.row = rowI;
+                    startField.desc[0] = startField.column + 65;
+                    startField.desc[1] = (startField.row + 1) +'0';
+                    startWalkFromField(startField);
+                    if(!(rowI == MAX_BOARD_SIZE - 1 && colI == MAX_BOARD_SIZE - 1)){
+                        initBoard();
+                        printLogOut("\n\nSchachbrett neu initialisiert\n");
+                    }
                 }
             }
+        } else {
+            startWalkFromField(startField);
         }
-    } else {
-        startWalkFromField(startField);
-    }
+
+        //flushing input Buffer
+        fseek(stdin,0,SEEK_END);
+
+        do{
+            printLogOut("\n\nWollen Sie erneut starten (J oder N): \n");
+            scanf("%c", &restart);
+            fprintf(logFile, "%c\n", restart);
+            restart=toupper(restart);
+
+            inputVerifier = (restart=='J'|| restart=='N');
+            if(inputVerifier == 0){
+                printLogOut("Eingabe falsch.\n");
+            }
+        }while( inputVerifier == 0 );
+
+        //flushing input Buffer
+        fseek(stdin,0,SEEK_END);
+
+    }while(restart=='J');
     stopLogging();
     return 0;
 }
